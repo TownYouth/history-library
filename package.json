@@ -1,6 +1,6 @@
 {
   "name": "history-library",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "history-library可以维护出一条浏览器页面跳转记录栈，在H5项目中页面应对动态流程返回指定页面场景问题很有效。但是在有iframe嵌套的情况下，还有一定缺陷，待续优化。",
   "main": "dist/history-library.umd.js",
   "module": "dist/history-library.mjs",
@@ -8,6 +8,11 @@
   "files": [
     "dist"
   ],
+  "homepage": "https://github.com/TownYouth/history-library#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TownYouth/history-library.git"
+  },
   "scripts": {
     "build": "vite build",
     "build:watch": "vite build --watch",
