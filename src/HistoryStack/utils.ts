@@ -27,10 +27,9 @@ export function onWindowPopstate(): Promise<PopStateEvent | null> {
 
 /**
  * 打印history信息
- * @param title
- * @param content
  */
-export function logHistory(title: string, content: any) {
+export function logHistory(title: string, content: any, logDisable = false) {
+  if (logDisable) return
   console.log(
     `%c${title}:\n`,
     'background:#989898;color:#fff;',
