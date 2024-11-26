@@ -28,11 +28,6 @@
   "author": "townyouth",
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.8.0",
-    "prettier": "^3.4.0",
-    "typescript": "5.1.6",
-    "vite": "^4.4.2",
-    "vite-plugin-dts": "^3.3.1",
-    "vue": "^3.5.13",
     "@vue/eslint-config-prettier": "^9.0.0",
     "@vue/eslint-config-typescript": "^13.0.0",
     "@vue/tsconfig": "^0.5.1",
@@ -41,6 +36,11 @@
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^6.4.0",
-    "eslint-plugin-vue": "^9.23.0"
+    "eslint-plugin-vue": "^9.23.0",
+    "prettier": "^3.4.0",
+    "typescript": "5.1.6",
+    "vite": "^4.4.2",
+    "vite-plugin-dts": "^3.3.1",
+    "vue": "^3.5.13"
   }
 }
