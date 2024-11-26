@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>historyLibrary</title>
+    <style>
+        #move {
+            width: 100px;
+            height: 100px;
+            background: #69c810;
+            cursor: move;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="move">
+        any dom moveable
+    </div>
+</body>
+<script src="../dist/history-library.umd.js"></script>
+<script>
+    // historyLibrary.toMove() 返回监听mousedown事件的处理函数
+    const movableAction = historyLibrary.toMove();
+    document.querySelector('#move').addEventListener('mousedown', movableAction);
+</script>
+
+</html>
