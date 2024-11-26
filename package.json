@@ -1,6 +1,6 @@
 {
   "name": "history-library",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "history-library可以维护出一条浏览器页面跳转记录栈，在H5项目中页面应对动态流程返回指定页面场景问题很有效。但是在有iframe嵌套的情况下，还有一定缺陷，待续优化。",
   "main": "dist/history-library.umd.js",
   "module": "dist/history-library.mjs",
@@ -16,7 +16,9 @@
   "scripts": {
     "build": "vite build",
     "build:watch": "vite build --watch",
-    "pushnpm": "npm publish --registry https://registry.npmjs.org"
+    "pushnpm": "npm publish --registry https://registry.npmjs.org",
+    "lint": "eslint . --ext .vue,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
+    "format": "prettier --write src/"
   },
   "keywords": [
     "js",
@@ -25,10 +27,20 @@
   ],
   "author": "townyouth",
   "devDependencies": {
-    "typescript": "^5.1.6",
+    "@rushstack/eslint-patch": "^1.8.0",
+    "prettier": "^3.4.0",
+    "typescript": "5.1.6",
     "vite": "^4.4.2",
     "vite-plugin-dts": "^3.3.1",
-    "vue": "^3.5.13"
+    "vue": "^3.5.13",
+    "@vue/eslint-config-prettier": "^9.0.0",
+    "@vue/eslint-config-typescript": "^13.0.0",
+    "@vue/tsconfig": "^0.5.1",
+    "eslint": "^8.57.0",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^6.4.0",
+    "eslint-plugin-vue": "^9.23.0"
   }
 }
-

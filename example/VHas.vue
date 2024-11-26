@@ -5,9 +5,9 @@
 </template>
 
 <script setup lang='ts'>
-import { moveDirective } from 'history-library';
+import { moveDirective } from 'history-library'
 // 注册局部指令
-const vMove2 = moveDirective;
+const vMove2 = moveDirective
 </script>
 
 <script lang="ts">
