@@ -1,5 +1,5 @@
 import Communication from './Communication'
-import DataCache from './DataCache'
+import { sessionRef } from './CacheRef'
 import type { HistoryStackEvents, HistoryStackType, StateInfo } from './type'
 import { enumerableProperties, getHistoryKey } from './utils'
 
@@ -7,11 +7,11 @@ class HistoryStack extends Communication<HistoryStackEvents> {
   /**
    * 路由栈
    */
-  stateStack = new DataCache<StateInfo[]>('_historyStack_stateStack', [])
+  stateStack = sessionRef<StateInfo[]>('_historyStack_stateStack', [])
   /**
    * 路由栈的索引
    */
-  stackPosition = new DataCache<number>('_historyStack_stackPosition', 0)
+  stackPosition = sessionRef<number>('_historyStack_stackPosition', 0)
   /**
    * 路由栈的锚点
    */
