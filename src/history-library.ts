@@ -2,33 +2,37 @@ import { getCallbackType } from './HistoryStack/Communication'
 import HistoryStack from './HistoryStack/HistoryStack'
 import {
   HistoryStackEvents,
-  HistoryStackOptions,
   onFailInterface,
-  PopStateByPath
+  PopStateByPath,
+  PopStateByPathOptions
 } from './HistoryStack/type'
 import { isSamePath, logHistory, onWindowPopstate } from './HistoryStack/utils'
 
-declare global {
-  interface Window {
-    __historyStack: HistoryStack
-  }
-}
-
-export const _instance: HistoryStack = new HistoryStack()
-window.__historyStack = _instance
-
-const _options = {
-  diffURL: isSamePath,
-  logDisabled: false
-} as HistoryStackOptions
+const _instance: HistoryStack = new HistoryStack()
 
 /**
- * 创建一个HistoryStack实例
- * 这是初始化必须做的事情
+ * HistoryStack 配置项
  */
-export function createHistoryStack(options?: Partial<HistoryStackOptions>) {
-  Object.assign(_options, options || {})
-  return _instance
+interface HistoryLibraryOptions {
+  /**
+   * 自定义对比路径方法
+   * @param href 路由栈中存储的完整路径，来自location.href，如：http://localhost.com:8888/a/b?a=123
+   * @param path 外部传入的简略路径，如：a/b
+   * @returns 是否相同，相同为true
+   */
+  diffURL: (href: string, path: string) => boolean
+  /**
+   * 是否禁用log
+   */
+  logDisabled: boolean
+}
+
+/**
+ * HistoryLibrary 配置项
+ */
+const options: HistoryLibraryOptions = {
+  diffURL: isSamePath,
+  logDisabled: false
 }
 
 /**
@@ -37,17 +41,25 @@ export function createHistoryStack(options?: Partial<HistoryStackOptions>) {
  * @param isForward // 是否前进
  * @param relativeStep // 相对步数
  */
-function getStateIndex(path: string, isForward: boolean, relativeStep = 0) {
-  let filter = [..._instance.stateStack]
+function getStateIndex(
+  path: string,
+  isForward: boolean,
+  relativeStep = 0,
+  diffURL?: HistoryLibraryOptions['diffURL']
+) {
+  let filter = [..._instance.stateStack.value]
   if (isForward) {
-    filter = filter.slice(_instance.stackPosition)
+    filter = filter.slice(_instance.stackPosition.value)
   } else {
-    filter.length = _instance.stackPosition + 1
+    filter.length = _instance.stackPosition.value + 1
     filter.reverse()
   }
   let delta = filter.findIndex((item) => {
     if (item.isIframe) return false
-    return _options.diffURL(item.state, path)
+    if (diffURL) {
+      return diffURL(item.state, path)
+    }
+    return options.diffURL(item.state, path)
   })
   if (delta === -1) return null
 
@@ -56,15 +68,15 @@ function getStateIndex(path: string, isForward: boolean, relativeStep = 0) {
 
   const targetPosition = Math.max(
     0,
-    Math.min(_instance.stackPosition + delta, _instance.stateStack.length - 1)
+    Math.min(_instance.stackPosition.value + delta, _instance.stateStack.value.length - 1)
   )
 
-  delta = targetPosition - _instance.stackPosition
+  delta = targetPosition - _instance.stackPosition.value
 
   return {
     delta,
     targetPosition,
-    targetState: _instance.stateStack[targetPosition]
+    targetState: _instance.stateStack.value[targetPosition]
   }
 }
 
@@ -92,24 +104,25 @@ async function popstate(
   isForward: boolean,
   path: string,
   relativeStep = 0,
-  onFail?: onFailInterface
+  onFail: onFailInterface | undefined = undefined,
+  diffURL?: HistoryLibraryOptions['diffURL']
 ) {
   const iframeCount = _instance.iframes.length
   if (iframeCount) await recoverIframeHistoryStack()
 
-  const StateIndex = getStateIndex(path, isForward, relativeStep)
+  const StateIndex = getStateIndex(path, isForward, relativeStep, diffURL)
 
   logHistory(
     '$history popstate',
     {
       ...StateIndex,
       currentState: _instance.currentState,
-      stackPosition: _instance.stackPosition,
+      stackPosition: _instance.stackPosition.value,
       canPop: !!StateIndex,
       path,
       relativeStep
     },
-    _options.logDisabled
+    options.logDisabled
   )
 
   if (!StateIndex) {
@@ -126,7 +139,7 @@ async function popstate(
         isSuccess: location.href === StateIndex.targetState.state,
         isPop: popRes
       },
-      _options.logDisabled
+      options.logDisabled
     )
     let i = 0
     while (location.href !== StateIndex.targetState.state && i < 50) {
@@ -138,7 +151,7 @@ async function popstate(
           isSuccess: location.href === StateIndex.targetState.state,
           isPop: popRes
         },
-        _options.logDisabled
+        options.logDisabled
       )
       i++
     }
@@ -154,10 +167,13 @@ async function popstate(
  * @returns {Promise<boolean>} 跳转是否成功
  */
 export const backByPath: PopStateByPath = (
-  path: string,
+  path: string | PopStateByPathOptions,
   relativeStep?: number | onFailInterface,
   onFail?: onFailInterface
 ) => {
+  if (typeof path === 'object' && path) {
+    return popstate(false, path.path, path.relativeStep || 0, path.onFail, path.diffURL)
+  }
   if (typeof relativeStep === 'function') {
     onFail = relativeStep
     relativeStep = 0
@@ -173,10 +189,13 @@ export const backByPath: PopStateByPath = (
  * @returns {Promise<boolean>} 跳转是否成功
  */
 export const forwardByPath: PopStateByPath = (
-  path: string,
+  path: string | PopStateByPathOptions,
   relativeStep?: number | onFailInterface,
   onFail?: onFailInterface
 ) => {
+  if (typeof path === 'object' && path) {
+    return popstate(true, path.path, path.relativeStep || 0, path.onFail, path.diffURL)
+  }
   if (typeof relativeStep === 'function') {
     onFail = relativeStep
     relativeStep = 0
@@ -200,11 +219,11 @@ export const createAnchor = (anchorName: string) => {
  */
 export const goAnchor = (anchorName: string, relativeStep = 0) => {
   return new Promise<boolean>((resolve) => {
-    const i = _instance.stateStack.findIndex(
+    const i = _instance.stateStack.value.findIndex(
       (item) => item.stackKey === _instance.anchorMap[anchorName]
     )
     if (i === -1) return resolve(false)
-    const goStep = i - _instance.stackPosition + relativeStep
+    const goStep = i - _instance.stackPosition.value + relativeStep
     history.go(goStep)
     resolve(true)
   })
@@ -224,9 +243,18 @@ export const removeHistoryListener = (
   callback: getCallbackType<HistoryStackEvents, 'historyChange'>
 ) => _instance.$off('historyChange', callback)
 
+export const historyStack = _instance
+
+declare global {
+  interface Window {
+    __historyStack: HistoryStack
+  }
+}
+window.__historyStack = _instance
+
 export default {
+  options,
   historyStack: _instance,
-  createHistoryStack,
   backByPath,
   forwardByPath,
   createAnchor,

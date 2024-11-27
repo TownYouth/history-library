@@ -1,4 +1,5 @@
 import Communication from './Communication'
+import DataCache from './DataCache'
 import type { HistoryStackEvents, HistoryStackType, StateInfo } from './type'
 import { enumerableProperties, getHistoryKey } from './utils'
 
@@ -6,11 +7,11 @@ class HistoryStack extends Communication<HistoryStackEvents> {
   /**
    * 路由栈
    */
-  stateStack: StateInfo[] = []
+  stateStack = new DataCache<StateInfo[]>('_historyStack_stateStack', [])
   /**
    * 路由栈的索引
    */
-  stackPosition = 0
+  stackPosition = new DataCache<number>('_historyStack_stackPosition', 0)
   /**
    * 路由栈的锚点
    */
@@ -87,7 +88,9 @@ class HistoryStack extends Communication<HistoryStackEvents> {
     Object.setPrototypeOf(history, original)
 
     // 初始化路由栈
-    this.stateStack = [this.currentState]
+    if (!this.stateStack.value.length) {
+      this.stateStack.value = [this.currentState]
+    }
     if (!this.currentState.stackKey) {
       history.replaceState(null, '')
     }
@@ -105,22 +108,24 @@ class HistoryStack extends Communication<HistoryStackEvents> {
   }
 
   recordPush() {
-    this.stackPosition++
-    this.stateStack.length = this.stackPosition
-    this.stateStack.push(this.currentState)
+    this.stackPosition.value++
+    this.stateStack.value.length = this.stackPosition.value
+    this.stateStack.value.push(this.currentState)
   }
 
   recordReplace() {
-    this.stateStack.length = this.stackPosition
-    this.stateStack.push(this.currentState)
+    this.stateStack.value.length = this.stackPosition.value
+    this.stateStack.value.push(this.currentState)
   }
 
   recordPopstate() {
-    const index = this.stateStack.findIndex((item) => item.stackKey === this.currentState.stackKey)
+    const index = this.stateStack.value.findIndex(
+      (item) => item.stackKey === this.currentState.stackKey
+    )
 
     // 前进/后退
     if (index !== -1) {
-      this.stackPosition = index
+      this.stackPosition.value = index
       return
     }
 
@@ -150,9 +155,9 @@ class HistoryStack extends Communication<HistoryStackEvents> {
             state.isIframe = true
             state.length = history.length
             const deff = history.length - last
-            this.stackPosition += deff
+            this.stackPosition.value += deff
             const l = new Array(deff).fill(state)
-            this.stateStack = this.stateStack.concat(l)
+            this.stateStack.value = this.stateStack.value.concat(l)
             last = history.length
           }
         }, 1000)

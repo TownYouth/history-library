@@ -25,6 +25,12 @@ export interface onFailInterface {
   (path: string, relativeStep: number): void
 }
 
+export interface PopStateByPathOptions {
+  path: string
+  relativeStep?: number
+  onFail?: onFailInterface
+  diffURL?: (href: string, path: string) => boolean
+}
 /**
  * 跳转至指定路径
  * @param path 路径
@@ -34,6 +40,7 @@ export interface onFailInterface {
 export interface PopStateByPath {
   (path: string, relativeStep?: number, onFail?: onFailInterface): Promise<boolean>
   (path: string, onFail?: onFailInterface): Promise<boolean>
+  (options: PopStateByPathOptions): Promise<boolean>
 }
 
 /**
@@ -45,23 +52,6 @@ export type HistoryStackType = 'popstate' | 'push' | 'replace'
  * 路由跳转监听器
  */
 export type ListenerCallback = (type: HistoryStackType) => void
-
-/**
- * HistoryStack 配置项
- */
-export interface HistoryStackOptions {
-  /**
-   * 自定义对比路径方法
-   * @param href 路由栈中存储的完整路径，来自location.href，如：http://localhost.com:8888/a/b?a=123
-   * @param path 外部传入的简略路径，如：a/b
-   * @returns 是否相同，相同为true
-   */
-  diffURL: (href: string, path: string) => boolean
-  /**
-   * 是否禁用log
-   */
-  logDisabled: boolean
-}
 
 /**
  * 外部可监听事件
