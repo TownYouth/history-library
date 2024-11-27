@@ -104,7 +104,7 @@ interface forwardByPath {
 在浏览器历史记录中，返回/前进至指定路径。
 
 **参数说明：**
-path: 目标页面的路径，默认为URL的Path部分，如：URL为：http://localhost.com:8888/a/b?a=123，则path为：a/b，如果不符合要求可以在全局配置中传入自定义diffURL方法，或者在本方法传入自定义diffURL方法；
+path: 目标页面的路径，默认为URL的Path部分，如：URL为：```http://localhost.com:8888/a/b?a=123```，则path为：a/b，如果不符合要求可以在全局配置中传入自定义diffURL方法，或者在本方法传入自定义diffURL方法；
 relativeStep：相对步数，默认为0，即返回/前进至指定路径，正数为前进，负数为后退。适合目标页不确定但具有公共过程页面的情况；
 onFail：失败回调，当返回/前进失败时(如：路由栈中没有匹配到该页面时)调用该方法；
 diffURL：自定义对比路径方法。
