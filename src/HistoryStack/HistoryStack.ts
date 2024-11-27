@@ -15,7 +15,7 @@ class HistoryStack extends Communication<HistoryStackEvents> {
   /**
    * 路由栈的锚点
    */
-  anchorMap: Record<string, string> = {}
+  anchorMap: Record<string | symbol, string> = {}
   /**
    * 当前页面上的iframe元素个数
    */

@@ -18,11 +18,11 @@ interface HistoryLibraryOptions {
    * 自定义对比路径方法
    * @param href 路由栈中存储的完整路径，来自location.href，如：http://localhost.com:8888/a/b?a=123
    * @param path 外部传入的简略路径，如：a/b
-   * @returns 是否相同，相同为true
+   * @returns 是否相同，相同为 true
    */
   diffURL: (href: string, path: string) => boolean
   /**
-   * 是否禁用log
+   * 是否禁用log，true 为禁用，默认为 false
    */
   logDisabled: boolean
 }
@@ -33,6 +33,10 @@ interface HistoryLibraryOptions {
 const options: HistoryLibraryOptions = {
   diffURL: isSamePath,
   logDisabled: false
+}
+
+export function init(customOptions?: Partial<HistoryLibraryOptions>) {
+  Object.assign(options, customOptions || {})
 }
 
 /**
@@ -207,7 +211,7 @@ export const forwardByPath: PopStateByPath = (
  * 创建路由锚点
  * @param anchorName 锚点名称，返回时会用
  */
-export const createAnchor = (anchorName: string) => {
+export const createAnchor = (anchorName: string | symbol) => {
   _instance.anchorMap[anchorName] = history.state.stackKey
 }
 
@@ -217,7 +221,7 @@ export const createAnchor = (anchorName: string) => {
  * @param step 相当于跳转到指定页面再router.go(step)
  * @returns {Promise<boolean>} 跳转是否成功
  */
-export const goAnchor = (anchorName: string, relativeStep = 0) => {
+export const toAnchor = (anchorName: string | symbol, relativeStep = 0) => {
   return new Promise<boolean>((resolve) => {
     const i = _instance.stateStack.value.findIndex(
       (item) => item.stackKey === _instance.anchorMap[anchorName]
@@ -252,13 +256,16 @@ declare global {
 }
 window.__historyStack = _instance
 
-export default {
+export const $history = {
+  init,
   options,
   historyStack: _instance,
   backByPath,
   forwardByPath,
   createAnchor,
-  goAnchor,
+  toAnchor,
   addHistoryListener,
   removeHistoryListener
 }
+
+export default $history
